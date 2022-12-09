@@ -26,30 +26,30 @@ os.system('ssh-audit --level=warn ' + args.target + ' > ssh-audit.txt')
 os.system('ssh-keyscan -t rsa ' + args.target + ' > ssh-keyscan.txt')
 
 # SMTP
-#os.system('sudo nmap --script=smtp-commands,smtp-enum-users,smtp-ntlm-info,smtp-open-relay,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 ' + args.target + ' -Pn -oN smtp-scan -vvv')
+os.system('sudo nmap --script=smtp-commands,smtp-enum-users,smtp-ntlm-info,smtp-open-relay,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 ' + args.target + ' -Pn -oN smtp-scan -vvv')
 
-#os.system('openssl s_client -connect ' + args.target + ':443')
+os.system('openssl s_client -connect ' + args.target + ':443')
 
 # WhatWeb
-#os.system('whatweb -a 3 http://' + args.target + ' > whatweb-http.txt')
+os.system('whatweb -a 3 http://' + args.target + ' > whatweb-http.txt')
 
 
 # SSLScan
-#os.system('sslscan ' + args.target + ' > sslscan.txt')
+os.system('sslscan ' + args.target + ' > sslscan.txt')
 
 
 # TestSSL
-#os.system('/opt/testssl.sh-3.0.8/testssl.sh ' + args.target + ' > testssl.txt')
+os.system('/opt/testssl.sh-3.0.8/testssl.sh ' + args.target + ' > testssl.txt')
 
 # HTTP Nmap
-#os.system('nmap -vv -oN http-nmap.txt --open --reason -Pn -sV -p 80,443,943 --script="banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" ' + args.target)
+os.system('nmap -vv -oN http-nmap.txt --open --reason -Pn -sV -p 80,443,943 --script="banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" ' + args.target)
 
 # Web Fuzz
-#os.system('ffuf -u https://' + args.target + '/FUZZ -r -c -v -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories-lowercase.txt > webfuzz.txt')
-#os.system('gobuster dir -u https://' + args.target + ' -k -t 50 -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories-lowercase.txt --exclude-length 0 > webfuzz.txt')
+os.system('ffuf -u https://' + args.target + '/FUZZ -r -c -v -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories-lowercase.txt > webfuzz.txt')
+os.system('gobuster dir -u https://' + args.target + ' -k -t 50 -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories-lowercase.txt --exclude-length 0 > webfuzz.txt')
 
 # Nikto
-#os.system('nikto -h https://' + args.target + ' -o nikto.txt')
+os.system('nikto -h https://' + args.target + ' -o nikto.txt')
 
 # RPCBind/PortMapper
 os.system('rpcinfo ' + args.target + ' > rpcinfo.txt')
