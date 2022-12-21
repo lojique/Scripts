@@ -1,4 +1,5 @@
 # 
+# Tools used: SSHScan (https://github.com/evict/SSHScan), nmap, ssh-audit, ssh-keyscan, testssl.sh (https://github.com/drwetter/testssl.sh), enum4linux-ng (https://github.com/cddmp/enum4linux-ng), remote-method-guesser (https://github.com/qtc-de/remote-method-guesser/releases)
 
 # TODO 
 # Research python intersection() method for easier service port grouping
@@ -17,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-target', metavar='IP/Domain', type=str, help='IP Address or Domain')
 parser.add_argument('-target_list', metavar='hosts.lst', type=str, help='List of IP Addresses and/or Domains')
 parser.add_argument('-p', metavar='Port(s)', type=str, help='Service Ports')
+parser.add_argument('-http', action='store_true', help='Scan http Ports')
 
 args = parser.parse_args()
 
@@ -27,6 +29,7 @@ os.system('mkdir ' + args.target)
 os.chdir(args.target)
 
 ports = args.p.replace(',', ' ').split()
+
 for port in ports:
 
     # SSH
@@ -59,10 +62,10 @@ for port in ports:
         os.system('/opt/testssl.sh/testssl.sh ' + args.target + ':' + port + ' > testssl-' + port + '.txt')
     
     # HTTP Nmap
-    if port in ['80']: #, '443', '943', '3080' , '4080' , '5080' , '5357' , '5985' , '6080' , '7080' , '8080','13080']:
-        os.system('nmap -v -oN http-nmap.txt --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 --script="banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" ' + args.target)
-    if port in ['80']: #, '443', '943', '3080' , '4080' , '5080' , '5357' , '5985' , '6080' , '7080' , '8080','13080']:
-        os.system('nmap -v -oN http-aggr.nmap --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 -A ' + args.target)
+    # if port in ['http']: #, '443', '943', '3080' , '4080' , '5080' , '5357' , '5985' , '6080' , '7080' , '8080','13080']:
+    #     os.system('nmap -v -oN http-nmap.txt --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 --script="banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" ' + args.target)
+    # if port in ['http']: #, '443', '943', '3080' , '4080' , '5080' , '5357' , '5985' , '6080' , '7080' , '8080','13080']:
+    #     os.system('nmap -v -oN http-aggr.nmap --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 -A ' + args.target)
 
     # Web Fuzz
         #os.system('ffuf -u https://' + args.target + '/FUZZ -r -c -v -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories-lowercase.txt > webfuzz.txt')
@@ -118,17 +121,17 @@ for port in ports:
 
     # NetBios
     if port in ['139']:
-        os.system('nmblookup -A ' + args.target + ' > nmblookup.txt &&&& nbtscan ' + args.target + '/24 > nbtscan.txt &&&& nmap -sU -sV -T4 --script nbstat.nse -p 137 -Pn -n -oN nbstat.nmap ' + args.target)
+        os.system('nmblookup -A ' + args.target + ' > nmblookup.txt && nbtscan ' + args.target + '/24 > nbtscan.txt && nmap -sU -sV -T4 --script nbstat.nse -p 137 -Pn -n -oN nbstat.nmap ' + args.target)
 
     # SMB
     if port in ['445']:
         os.system('python3 /opt/enum4linux-ng/enum4linux-ng.py -A ' + args.target + ' > enum4linux.txt')
         os.system('smbmap -H ' + args.target + ' > smbmap.txt')
-        os.system('smbmap -u UserDoesntExist -H ' + args.target + ' > smbmap.txt')
+        os.system('smbmap -u UserDoesntExist -H ' + args.target + ' >> smbmap.txt')
         os.system('smbclient -N -L //' + args.target + ' > smbclient.txt')
         #os.system('rpcclient ' + args.target)
         #os.system('rpcclient -U "" ' + args.target)
-        os.system('impacket-getArch -target ' + args.target)
+        os.system('impacket-getArch -target ' + args.target + ' > impacket-getArch.txt')
         os.system('nmap -p 139,445 -vv -Pn --script=smb-vuln-cve2009-3103.nse,smb-vuln-ms06-025.nse,smb-vuln-ms07-029.nse,smb-vuln-ms08-067.nse,smb-vuln-ms10-054.nse,smb-vuln-ms10-061.nse,smb-vuln-ms17-010.nse -oN smb-scan.nmap ' + args.target)
 
     # IRC
@@ -136,3 +139,8 @@ for port in ports:
         os.system('nmap -sV --script irc-botnet-channels,irc-info,irc-unrealircd-backdoor -p 194,6660-7000 -Pn -oN irc.nmap ' + args.target)
 
     # HSQLDB (HyperSQL DataBase) [default creds: sa // blank password]
+
+if args.http:
+    #print('it works!')
+    os.system('nmap -v -oN http-aggr.nmap --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 -A ' + args.target)
+    os.system('nmap -v -oN http-nmap.txt --open --reason -Pn -sV -p 80,443,943,3080,4080,5080,5357,5985,6080,7080,8080,13080 --script="banner,(http* or ssl*) and not (brute or broadcast or dos or external or http-slowloris* or fuzzer)" ' + args.target)
